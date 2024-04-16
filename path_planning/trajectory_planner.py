@@ -64,7 +64,7 @@ class PathPlan(Node):
             path = self.plan_path(self.start_point, self.end_point, self.map)
             self.publish_trajectory(path)
 
-    def plan_path(self, start_point, end_point, map):
+    def plan_path(self, map):
         # A* search algorithm
         def heuristic(a, b):
             return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
