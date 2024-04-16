@@ -133,6 +133,7 @@ class PathPlan(Node):
             pose.pose.position.y = point[1]
             trajectory_msg.poses.append(pose)
         self.traj_pub.publish(trajectory_msg)
+        self.trajectory = self.trajectory.fromPoseArray(trajectory_msg)
         self.trajectory.publish_viz()
 
 def main(args=None):
