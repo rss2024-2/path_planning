@@ -50,10 +50,45 @@ class PathPlan(Node):
         self.map = None
         self.start_point = None
         self.end_point = None
-        self.trajectory = LineTrajec_tory(node=self, viz_namespace="/planned_trajectory")
+        self.trajectory = LineTrajectory(node=self, viz_namespace="/planned_trajectory")
 
     def map_cb(self, msg):
-        self.map = np.array(msg.data).reshape((msg.info.height, msg.info.width))
+        # Extract map dimensions from message
+        height = msg.info.height
+        width = msg.info.width
+
+        # Extract map resolution and origin from message
+        resolution = msg.info.resolution
+        origin = msg.info.origin
+
+        # Extract occupancy data from message
+        occupancy_data = msg.data
+
+        # Reshape occupancy data into a 2D numpy array
+        occupancy_grid = np.array(occupancy_data).reshape((height, width))
+
+        # Initialize empty array to store the converted map
+        converted_map = np.zeros((height, width))
+
+        # Iterate over each cell in the occupancy grid
+        for v in range(height):
+            for u in range(width):
+                # Convert pixel coordinates to real world coordinates
+                x = u * resolution + origin.position.x
+                y = v * resolution + origin.position.y
+
+                # Convert real world coordinates to pixel coordinates
+                u_new = int((x - origin.position.x) / resolution)
+                v_new = int((y - origin.position.y) / resolution)
+
+                # Check if the converted pixel coordinates are within bounds
+                if 0 <= u_new < width and 0 <= v_new < height:
+                    # Copy occupancy value from original grid to converted grid
+                    converted_map[v_new, u_new] = occupancy_grid[v, u]
+
+        # Store the converted map in the class attribute
+        self.map = converted_map
+
 
     def pose_cb(self, pose):
         self.start_point = pose.pose.pose.position
