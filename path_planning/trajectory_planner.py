@@ -13,9 +13,9 @@ class PathPlan(Node):
 
     def __init__(self):
         super().__init__("trajectory_planner")
-        self.declare_parameter('odom_topic', "default")
-        self.declare_parameter('map_topic', "default")
-        self.declare_parameter('initial_pose_topic', "default")
+        self.declare_parameter('odom_topic', "/odom")
+        self.declare_parameter('map_topic', "/map")
+        self.declare_parameter('initial_pose_topic', "/initialpose")
 
         self.odom_topic = self.get_parameter('odom_topic').get_parameter_value().string_value
         self.map_topic = self.get_parameter('map_topic').get_parameter_value().string_value
@@ -50,7 +50,7 @@ class PathPlan(Node):
         self.map = None
         self.start_point = None
         self.end_point = None
-        self.trajectory = LineTrajectory(node=self, viz_namespace="/planned_trajectory")
+        self.trajectory = LineTrajec_tory(node=self, viz_namespace="/planned_trajectory")
 
     def map_cb(self, msg):
         self.map = np.array(msg.data).reshape((msg.info.height, msg.info.width))
