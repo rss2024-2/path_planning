@@ -119,8 +119,8 @@ class PathPlan(Node):
                 return heuristic(from_node, to_node)
 
         graph = Graph(map)
-        start = (int(start_point.x), int(start_point.y))
-        goal = (int(end_point.x), int(end_point.y))
+        start = (int(self.start_point.x), int(self.start_point.y))
+        goal = (int(self.end_point.x), int(self.end_point.y))
         path = a_star_search(graph, start, goal)
         return path
 
