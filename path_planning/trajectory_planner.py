@@ -184,8 +184,8 @@ class PathPlan(Node):
         graph = Graph(map)
         start = (int(self.start_point.x), int(self.start_point.y))
         goal = (int(self.end_point.x), int(self.end_point.y))
-        pixel_start = self.xy_to_uv(self.start_point.x, self.start_point.y)
-        pixel_end = self.xy_to_uv(self.start_point.x, self.start_point.y)
+        pixel_start = self.xy_to_uv(int(self.start_point.x), int(self.start_point.y))
+        pixel_end = self.xy_to_uv(int(self.start_point.x), int(self.start_point.y))
         path = a_star_search(graph, pixel_start, pixel_end)
         return path
 
