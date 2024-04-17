@@ -183,9 +183,10 @@ class PathPlan(Node):
 
         graph = Graph(map)
         start = (int(self.start_point.x), int(self.start_point.y))
-
         goal = (int(self.end_point.x), int(self.end_point.y))
-        path = a_star_search(graph, start, goal)
+        pixel_start = self.xy_to_uv(self.start_point.x, self.start_point.y)
+        pixel_end = self.xy_to_uv(self.start_point.x, self.start_point.y)
+        path = a_star_search(graph, pixel_start, pixel_end)
         return path
 
     def publish_trajectory(self, path):
@@ -228,7 +229,7 @@ class PathPlan(Node):
         x = rotated_coords[0] + origin.position.x
         y = rotated_coords[1] + origin.position.y
 
-        return x, y
+        return (x, y)
     
     def xy_to_uv(self, x, y):
         # Extract map resolution and origin from the message
@@ -257,7 +258,7 @@ class PathPlan(Node):
         u = rotated_coords[0] / resolution
         v = rotated_coords[1] / resolution
 
-        return u, v
+        return (u, v)
         
 
 def main(args=None):
