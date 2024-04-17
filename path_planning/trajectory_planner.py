@@ -60,8 +60,9 @@ class PathPlan(Node):
         width = msg.info.width
 
         # Extract map resolution and origin from message
-        resolution = msg.info.resolution
-        origin = msg.info.origin
+        self.resolution = msg.info.resolution
+        self.origin = msg.info.origin
+        self.orientation = msg.info.orientation
 
         # Extract occupancy data from message
         occupancy_data = msg.data
@@ -182,6 +183,7 @@ class PathPlan(Node):
 
         graph = Graph(map)
         start = (int(self.start_point.x), int(self.start_point.y))
+
         goal = (int(self.end_point.x), int(self.end_point.y))
         path = a_star_search(graph, start, goal)
         return path
@@ -198,6 +200,65 @@ class PathPlan(Node):
         self.traj_pub.publish(trajectory_msg)
         self.trajectory = self.trajectory.fromPoseArray(trajectory_msg)
         self.trajectory.publish_viz()
+
+    def uv_to_xy(self, u, v):
+        # Extract map resolution and origin from the message
+        resolution = self.resolution
+        origin = self.origin
+
+        # Extract orientation quaternion from the message
+        orientation = self.orientation
+
+        # Convert quaternion to rotation matrix
+        x, y, z, w = orientation.x, orientation.y, orientation.z, orientation.w
+        rotation_matrix = np.array([
+            [1 - 2*y*y - 2*z*z, 2*x*y - 2*w*z, 2*x*z + 2*w*y],
+            [2*x*y + 2*w*z, 1 - 2*x*x - 2*z*z, 2*y*z - 2*w*x],
+            [2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y]
+        ])
+
+        # Convert pixel coordinates to real-world coordinates
+        x_real = u * resolution
+        y_real = v * resolution
+
+        # Apply rotation
+        rotated_coords = np.dot(rotation_matrix, np.array([x_real, y_real, 0]))
+
+        # Translate by origin
+        x = rotated_coords[0] + origin.position.x
+        y = rotated_coords[1] + origin.position.y
+
+        return x, y
+    
+    def xy_to_uv(self, x, y):
+        # Extract map resolution and origin from the message
+        resolution = self.resolution
+        origin = self.origin
+
+        # Extract orientation quaternion from the message
+        orientation = self.orientation
+
+        # Convert quaternion to rotation matrix
+        x, y, z, w = orientation.x, orientation.y, orientation.z, orientation.w
+        rotation_matrix = np.array([
+            [1 - 2*y*y - 2*z*z, 2*x*y - 2*w*z, 2*x*z + 2*w*y],
+            [2*x*y + 2*w*z, 1 - 2*x*x - 2*z*z, 2*y*z - 2*w*x],
+            [2*x*z - 2*w*y, 2*y*z + 2*w*x, 1 - 2*x*x - 2*y*y]
+        ])
+
+        # Apply translation
+        translated_coords = np.array([x - origin.position.x, y - origin.position.y, 0])
+
+        # Apply rotation inverse
+        inverse_rotation_matrix = np.linalg.inv(rotation_matrix)
+        rotated_coords = np.dot(inverse_rotation_matrix, translated_coords)
+
+        # Convert real-world coordinates to pixel coordinates
+        u = rotated_coords[0] / resolution
+        v = rotated_coords[1] / resolution
+
+        return u, v
+        
 
 def main(args=None):
     rclpy.init(args=args)
