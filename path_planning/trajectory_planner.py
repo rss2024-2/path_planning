@@ -96,7 +96,7 @@ class PathPlan(Node):
     def goal_cb(self, msg):
         self.end_point = msg.pose.position
         if self.map is not None and self.start_point is not None:
-            path = self.plan_path(self.start_point, self.end_point, self.map)
+            path = self.plan_path(self.map)
             self.publish_trajectory(path)
 
     def plan_path(self, map):
@@ -162,6 +162,7 @@ class PathPlan(Node):
     def publish_trajectory(self, path):
         trajectory_msg = PoseArray()
         trajectory_msg.header.frame_id = "map"
+        trajectory_msg.header.stamp = self.get_clock().now().to_msg()
         for point in path:
             pose = PoseStamped()
             pose.pose.position.x = point[0]
