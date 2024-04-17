@@ -173,7 +173,7 @@ class PathPlan(Node):
                         if dx == 0 and dy == 0:
                             continue
                         nx, ny = x + dx, y + dy
-                        if 0 <= nx < self.map.shape[0] and 0 <= ny < self.map.shape[1] and self.map[nx][ny] == 0:
+                        if 0 <= nx < self.map.shape[1] and 0 <= ny < self.map.shape[0] and self.map[ny][nx] == 0:
                             neighbors.append((nx, ny))
                 return neighbors
 
