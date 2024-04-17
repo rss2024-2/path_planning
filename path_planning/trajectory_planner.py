@@ -185,7 +185,7 @@ class PathPlan(Node):
         start = (int(self.start_point.x), int(self.start_point.y))
         goal = (int(self.end_point.x), int(self.end_point.y))
         pixel_start = self.xy_to_uv(int(self.start_point.x), int(self.start_point.y))
-        pixel_end = self.xy_to_uv(int(self.start_point.x), int(self.start_point.y))
+        pixel_end = self.xy_to_uv(int(self.end_point.x), int(self.end_point.y))
         path = a_star_search(graph, pixel_start, pixel_end)
         return path
 
@@ -229,7 +229,7 @@ class PathPlan(Node):
 
         return (x, y)
     
-    def xy_to_uv(self, x, y):
+    def xy_to_uv(self, nx, ny):
         # Extract map resolution and origin from the message
         resolution = self.resolution
 
@@ -245,7 +245,7 @@ class PathPlan(Node):
         ])
 
         # Apply translation
-        translated_coords = np.array([x - self.position.x, y - self.position.y, 0])
+        translated_coords = np.array([nx - self.position.x, ny - self.position.y, 0])
 
         # Apply rotation inverse
         inverse_rotation_matrix = np.linalg.inv(rotation_matrix)
