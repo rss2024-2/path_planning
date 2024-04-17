@@ -3,9 +3,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseArray
 from nav_msgs.msg import OccupancyGrid
 from .utils import LineTrajectory
+from scipy import ndimage
 import numpy as np
 import heapq
-import ndimage
 
 class PathPlan(Node):
     """ Listens for goal pose published by RViz and uses it to plan a path from
@@ -54,6 +54,7 @@ class PathPlan(Node):
         self.trajectory = LineTrajectory(node=self, viz_namespace="/planned_trajectory")
 
     def map_cb(self, msg):
+        self.get_logger().info("Map called")
         # Extract map dimensions from message
         height = msg.info.height
         width = msg.info.width
@@ -115,12 +116,15 @@ class PathPlan(Node):
 
     def pose_cb(self, pose):
         self.start_point = pose.pose.pose.position
+        self.get_logger().info("Pose initialized")
 
     def goal_cb(self, msg):
+
         self.end_point = msg.pose.position
         if self.map is not None and self.start_point is not None:
             path = self.plan_path(self.map)
             self.publish_trajectory(path)
+            self.get_logger().info("Published trajectory")
 
     def plan_path(self, map):
         # A* search algorithm
