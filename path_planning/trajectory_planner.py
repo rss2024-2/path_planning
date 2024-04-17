@@ -83,10 +83,12 @@ class PathPlan(Node):
         structure_element[mask] = 1
 
             # Perform erosion
-        eroded_grid = ndimage.binary_erosion(occupancy_grid, structure=structure_element)
+        dilated_grid = ndimage.binary_dilation(occupancy_grid, structure=structure_element)
+
+        eroded_grid = ndimage.binary_erosion(dilated_grid, structure=structure_element)
 
         # Perform dilation
-        dilated_grid = ndimage.binary_dilation(eroded_grid, structure=structure_element)
+        
 
 
         # Iterate over each cell in the occupancy grid
@@ -108,7 +110,7 @@ class PathPlan(Node):
         #             converted_map[v_new, u_new] = occupancy_grid[v, u]
 
         # Store the converted map in the class attribute
-        self.map = dilated_grid
+        self.map = eroded_grid
 
 
     def pose_cb(self, pose):
