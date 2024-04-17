@@ -61,7 +61,7 @@ class PathPlan(Node):
 
         # Extract map resolution and origin from message
         self.resolution = msg.info.resolution
-        self.origin = msg.info.origin
+        self.position = msg.info.origin.position
         self.orientation = msg.info.origin.orientation
 
         # Extract occupancy data from message
@@ -205,8 +205,6 @@ class PathPlan(Node):
     def uv_to_xy(self, u, v):
         # Extract map resolution and origin from the message
         resolution = self.resolution
-        origin = self.origin
-
         # Extract orientation quaternion from the message
         orientation = self.orientation
 
@@ -226,15 +224,14 @@ class PathPlan(Node):
         rotated_coords = np.dot(rotation_matrix, np.array([x_real, y_real, 0]))
 
         # Translate by origin
-        x = rotated_coords[0] + origin.position.x
-        y = rotated_coords[1] + origin.position.y
+        x = rotated_coords[0] + self.position.x
+        y = rotated_coords[1] + self.position.y
 
         return (x, y)
     
     def xy_to_uv(self, x, y):
         # Extract map resolution and origin from the message
         resolution = self.resolution
-        origin = self.origin
 
         # Extract orientation quaternion from the message
         orientation = self.orientation
@@ -248,7 +245,7 @@ class PathPlan(Node):
         ])
 
         # Apply translation
-        translated_coords = np.array([x - origin.position.x, y - origin.position.y, 0])
+        translated_coords = np.array([x - self.position.x, y - self.position.y, 0])
 
         # Apply rotation inverse
         inverse_rotation_matrix = np.linalg.inv(rotation_matrix)
