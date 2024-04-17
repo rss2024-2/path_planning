@@ -5,6 +5,7 @@ from nav_msgs.msg import OccupancyGrid
 from .utils import LineTrajectory
 import numpy as np
 import heapq
+import ndimage
 
 class PathPlan(Node):
     """ Listens for goal pose published by RViz and uses it to plan a path from
@@ -63,31 +64,51 @@ class PathPlan(Node):
 
         # Extract occupancy data from message
         occupancy_data = msg.data
+        
 
         # Reshape occupancy data into a 2D numpy array
         occupancy_grid = np.array(occupancy_data).reshape((height, width))
 
-        # Initialize empty array to store the converted map
-        converted_map = np.zeros((height, width))
+
+
+        # Define the radius of the disk element
+        radius = 10
+
+# Create a disk-shaped structuring element
+# The structuring element is a square array where pixels outside the disk are set to zero
+# and pixels inside the disk are set to one
+        structure_element = np.zeros((2 * radius + 1, 2 * radius + 1))
+        y, x = np.ogrid[-radius:radius + 1, -radius:radius + 1]
+        mask = x**2 + y**2 <= radius**2
+        structure_element[mask] = 1
+
+            # Perform erosion
+        eroded_grid = ndimage.binary_erosion(occupancy_grid, structure=structure_element)
+
+        # Perform dilation
+        dilated_grid = ndimage.binary_dilation(eroded_grid, structure=structure_element)
+
 
         # Iterate over each cell in the occupancy grid
-        for v in range(height):
-            for u in range(width):
-                # Convert pixel coordinates to real world coordinates
-                x = u * resolution + origin.position.x
-                y = v * resolution + origin.position.y
+        # Initialize empty array to store the converted map
+        # converted_map = np.zeros((height, width))
+        # for v in range(height):
+        #     for u in range(width):
+        #         # Convert pixel coordinates to real world coordinates
+        #         x = u * resolution + origin.position.x
+        #         y = v * resolution + origin.position.y
 
-                # Convert real world coordinates to pixel coordinates
-                u_new = int((x - origin.position.x) / resolution)
-                v_new = int((y - origin.position.y) / resolution)
+        #         # Convert real world coordinates to pixel coordinates
+        #         u_new = int((x - origin.position.x) / resolution)
+        #         v_new = int((y - origin.position.y) / resolution)
 
-                # Check if the converted pixel coordinates are within bounds
-                if 0 <= u_new < width and 0 <= v_new < height:
-                    # Copy occupancy value from original grid to converted grid
-                    converted_map[v_new, u_new] = occupancy_grid[v, u]
+        #         # Check if the converted pixel coordinates are within bounds
+        #         if 0 <= u_new < width and 0 <= v_new < height:
+        #             # Copy occupancy value from original grid to converted grid
+        #             converted_map[v_new, u_new] = occupancy_grid[v, u]
 
         # Store the converted map in the class attribute
-        self.map = converted_map
+        self.map = dilated_grid
 
 
     def pose_cb(self, pose):
