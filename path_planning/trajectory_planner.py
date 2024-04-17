@@ -62,7 +62,7 @@ class PathPlan(Node):
         # Extract map resolution and origin from message
         self.resolution = msg.info.resolution
         self.origin = msg.info.origin
-        self.orientation = msg.info.orientation
+        self.orientation = msg.info.origin.orientation
 
         # Extract occupancy data from message
         occupancy_data = msg.data
