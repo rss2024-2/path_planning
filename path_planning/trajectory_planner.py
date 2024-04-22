@@ -187,8 +187,8 @@ class PathPlan(Node):
         trajectory_msg.header.stamp = self.get_clock().now().to_msg()
         for point in path:
             pose = PoseStamped()
-            pose.pose.position.x = point[0]
-            pose.pose.position.y = point[1]
+            pose.pose.position.x = float(point[0])
+            pose.pose.position.y = float(point[1])
             trajectory_msg.poses.append(pose)
         self.traj_pub.publish(trajectory_msg)
         self.trajectory = self.trajectory.fromPoseArray(trajectory_msg)
