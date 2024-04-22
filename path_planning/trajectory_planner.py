@@ -70,9 +70,6 @@ class PathPlan(Node):
 
         # Reshape occupancy data into a 2D numpy array
         occupancy_grid = np.array(occupancy_data).reshape((height, width))
-
-
-
         # Define the radius of the disk element
         radius = 10
 
@@ -86,13 +83,9 @@ class PathPlan(Node):
 
             # Perform erosion
         dilated_grid = ndimage.binary_dilation(occupancy_grid, structure=structure_element)
-
         eroded_grid = ndimage.binary_erosion(dilated_grid, structure=structure_element)
-
         # Perform dilation
-        
-
-
+    
         # Iterate over each cell in the occupancy grid
         # Initialize empty array to store the converted map
         # converted_map = np.zeros((height, width))
@@ -174,8 +167,9 @@ class PathPlan(Node):
                         if dx == 0 and dy == 0:
                             continue
                         nx, ny = x + dx, y + dy
-                        if 0 <= nx < self.map.shape[1] and 0 <= ny < self.map.shape[0] and self.map[ny][nx] == 0:
-                            neighbors.append((nx, ny))
+                        if 0 <= nx < self.map.shape[1] and 0 <= ny < self.map.shape[0]:
+                            if self.map[ny][nx] == 0:
+                                neighbors.append((nx, ny))
                 return neighbors
 
             def cost(self, from_node, to_node):
