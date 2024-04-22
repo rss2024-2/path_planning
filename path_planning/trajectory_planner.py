@@ -112,7 +112,6 @@ class PathPlan(Node):
         self.get_logger().info("Pose initialized")
 
     def goal_cb(self, msg):
-
         self.end_point = msg.pose.position
         if self.map is not None and self.start_point is not None:
             path = self.plan_path(self.map)
@@ -120,6 +119,7 @@ class PathPlan(Node):
             self.get_logger().info("Published trajectory")
 
     def plan_path(self, map):
+        self.get_logger().info("start planning path")
         # A* search algorithm
         def heuristic(a, b):
             return np.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
@@ -151,7 +151,9 @@ class PathPlan(Node):
                 current_node = came_from[current_node]
             path.append(start)
             path.reverse()
+            self.get_logger().info("finish planning path")
             return path
+            
 
         # Convert map to graph representation
         class Graph:
@@ -182,6 +184,7 @@ class PathPlan(Node):
         return path
 
     def publish_trajectory(self, path):
+        self.get_logger().info("pubbing trajectory")
         trajectory_msg = PoseArray()
         trajectory_msg.header.frame_id = "map"
         trajectory_msg.header.stamp = self.get_clock().now().to_msg()
@@ -191,6 +194,7 @@ class PathPlan(Node):
             pose.pose.position.y = float(point[1])
             trajectory_msg.poses.append(pose)
         self.traj_pub.publish(trajectory_msg)
+        self.get_logger().info("finish pubbing trajectory")
         self.trajectory = self.trajectory.fromPoseArray(trajectory_msg)
         self.trajectory.publish_viz()
 
