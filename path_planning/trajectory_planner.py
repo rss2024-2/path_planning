@@ -167,8 +167,8 @@ class PathPlan(Node):
             def neighbors(self, node):
                 neighbors = []
                 x, y = node
-                for dx in np.linspace(-1,1,10):
-                    for dy in np.linspace(-1, 1,10):
+                for dx in np.linspace(-1,1,3):
+                    for dy in np.linspace(-1, 1,3):
                         if dx == 0 and dy == 0:
                             continue
                         nx, ny = x + dx, y + dy
