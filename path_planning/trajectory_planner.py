@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseArray
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseArray, Pose
 from nav_msgs.msg import OccupancyGrid
 from .utils import LineTrajectory
 from scipy import ndimage
@@ -189,14 +189,17 @@ class PathPlan(Node):
         trajectory_msg.header.frame_id = "map"
         trajectory_msg.header.stamp = self.get_clock().now().to_msg()
         for point in path:
-            pose = PoseStamped()
-            pose.pose.position.x = float(point[0])
-            pose.pose.position.y = float(point[1])
+            pose = Pose()
+            
+            pose.position.x, pose.position.y = self.uv_to_xy(point[0], point[1])
+        
             trajectory_msg.poses.append(pose)
         self.traj_pub.publish(trajectory_msg)
         self.get_logger().info("finish pubbing trajectory")
-        self.trajectory = self.trajectory.fromPoseArray(trajectory_msg)
-        self.trajectory.publish_viz()
+        self.trajectory.clear()
+        self.trajectory.fromPoseArray(trajectory_msg)
+        
+        self.trajectory.publish_viz(duration = 0.0)
 
     def uv_to_xy(self, u, v):
         # Extract map resolution and origin from the message
