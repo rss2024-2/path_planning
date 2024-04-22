@@ -80,7 +80,6 @@ class PathPlan(Node):
         y, x = np.ogrid[-radius:radius + 1, -radius:radius + 1]
         mask = x**2 + y**2 <= radius**2
         structure_element[mask] = 1
-
             # Perform erosion
         dilated_grid = ndimage.binary_dilation(occupancy_grid, structure=structure_element)
         eroded_grid = ndimage.binary_erosion(dilated_grid, structure=structure_element)
@@ -176,10 +175,9 @@ class PathPlan(Node):
                 return heuristic(from_node, to_node)
 
         graph = Graph(map)
-        start = (int(self.start_point.x), int(self.start_point.y))
-        goal = (int(self.end_point.x), int(self.end_point.y))
-        pixel_start = self.xy_to_uv(int(self.start_point.x), int(self.start_point.y))
-        pixel_end = self.xy_to_uv(int(self.end_point.x), int(self.end_point.y))
+
+        pixel_start = self.xy_to_uv(self.start_point.x, self.start_point.y)
+        pixel_end = self.xy_to_uv(self.end_point.x, self.end_point.y)
         path = a_star_search(graph, pixel_start, pixel_end)
         return path
 
@@ -246,8 +244,8 @@ class PathPlan(Node):
         rotated_coords = np.dot(inverse_rotation_matrix, translated_coords)
 
         # Convert real-world coordinates to pixel coordinates
-        u = rotated_coords[0] / resolution
-        v = rotated_coords[1] / resolution
+        u = int(rotated_coords[0] / resolution)
+        v = int(rotated_coords[1] / resolution)
 
         return (u, v)
         
