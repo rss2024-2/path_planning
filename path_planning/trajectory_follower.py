@@ -85,8 +85,8 @@ class PurePursuit(Node):
                 p2=p1
                 continue
 
-            sp1=np.array(p1)-pose[:2]
-            sp2=np.array(p2)-pose[:2]
+            sp2=np.array(p1)-pose[:2]
+            sp1=np.array(p2)-pose[:2]
             d=sp2-sp1
 
             qa=d.dot(d)
