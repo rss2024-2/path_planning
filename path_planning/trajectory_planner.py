@@ -61,6 +61,7 @@ class PathPlan(Node):
 
         # Extract map resolution and origin from message
         self.resolution = msg.info.resolution
+        print(self.resolution)
         self.position = msg.info.origin.position
         self.orientation = msg.info.origin.orientation
 
@@ -82,7 +83,7 @@ class PathPlan(Node):
         structure_element[mask] = 1
             # Perform erosion
         dilated_grid = ndimage.binary_dilation(occupancy_grid, structure=structure_element)
-        eroded_grid = ndimage.binary_erosion(dilated_grid, structure=structure_element)
+        #eroded_grid = ndimage.binary_erosion(dilated_grid, structure=structure_element)
         # Perform dilation
     
         # Iterate over each cell in the occupancy grid
@@ -104,7 +105,7 @@ class PathPlan(Node):
         #             converted_map[v_new, u_new] = occupancy_grid[v, u]
 
         # Store the converted map in the class attribute
-        self.map = eroded_grid
+        self.map = dilated_grid
 
 
     def pose_cb(self, pose):
@@ -133,7 +134,10 @@ class PathPlan(Node):
             while frontier:
                 current_cost, current_node = heapq.heappop(frontier)
 
-                if current_node == goal:
+
+                if heuristic(current_node, goal) <= 1e-3:
+                    self.get_logger().info("found goal")
+                    goal=current_node
                     break
 
                 for next_node in graph.neighbors(current_node):
@@ -163,13 +167,13 @@ class PathPlan(Node):
             def neighbors(self, node):
                 neighbors = []
                 x, y = node
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
+                for dx in np.linspace(-1,1,10):
+                    for dy in np.linspace(-1, 1,10):
                         if dx == 0 and dy == 0:
                             continue
-                        nx, ny = int(x + dx), int(y + dy)
+                        nx, ny = x + dx, y + dy
                         if 0 <= nx < self.map.shape[1] and 0 <= ny < self.map.shape[0]:
-                            if self.map[ny][nx] == 0:
+                            if self.map[int(ny)][int(nx)] == 0:
                                 neighbors.append((nx, ny))
                 return neighbors
 
