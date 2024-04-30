@@ -72,7 +72,7 @@ class PathPlan(Node):
         # Reshape occupancy data into a 2D numpy array
         occupancy_grid = np.array(occupancy_data).reshape((height, width))
         # Define the radius of the disk element
-        radius = 10
+        radius = 12
 
 # Create a disk-shaped structuring element
 # The structuring element is a square array where pixels outside the disk are set to zero
@@ -151,6 +151,8 @@ class PathPlan(Node):
             path = []
             current_node = goal
             while current_node != start:
+                #if len(path)>=2 and (current_node[0]-path[-2][0])*(path[-1][1]-path[-2][1])-(current_node[1]-path[-2][1])*(path[-1][0]-path[-2][0])==0:
+                #    path=path[:-1]
                 path.append(current_node)
                 current_node = came_from[current_node]
             path.append(start)
@@ -167,8 +169,8 @@ class PathPlan(Node):
             def neighbors(self, node):
                 neighbors = []
                 x, y = node
-                for dx in np.linspace(-1,1,3):
-                    for dy in np.linspace(-1, 1,3):
+                for dx in [-1,0,1]:
+                    for dy in [-1,0,1]:
                         if dx == 0 and dy == 0:
                             continue
                         nx, ny = x + dx, y + dy
